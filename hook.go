@@ -35,12 +35,11 @@ func New(w io.Writer, f logrus.Formatter) logrus.Hook {
 // Hook's formatter is used to format the entry into Logstash format
 // and Hook's writer is used to write the formatted entry to the Logstash instance.
 func (h Hook) Fire(e *logrus.Entry) error {
-	dataBytes, err := h.formatter.Format(e)
-	if err != nil {
-		return err
-	}
-	_, err = h.writer.Write(dataBytes)
-	return err
+	go func() {
+		dataBytes, _ := h.formatter.Format(e)
+		h.writer.Write(dataBytes)
+	}()
+	return nil
 }
 
 // Levels returns all logrus levels.
